@@ -34,12 +34,12 @@ public class HandInputScript : MonoBehaviour
     void ConfigHands()
     {
         InputDevices.GetDevicesAtXRNode(XRNode.LeftHand, inputDevices);
-        if (inputDevices.Count == 1)
+        if (inputDevices.Count >= 1)
             leftDevice = inputDevices[0];
         else
             Debug.Log("No device found for LeftHand");
         InputDevices.GetDevicesAtXRNode(XRNode.RightHand, inputDevices);
-        if (inputDevices.Count == 1)
+        if (inputDevices.Count >= 1)
             rightDevice = inputDevices[0];
         else
             Debug.Log("No device found for rightHand");
