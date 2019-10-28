@@ -15,11 +15,6 @@ public class GravitySim : MonoBehaviour
     // in Start() and make it immutable
     public void RegisterObject(GravitySimObject obj)
     {
-        if(obj == trackObject)
-        {
-            tracking = true;
-        }
-        else
         {
             members.Add(obj);
             obj.worldSim = this;
@@ -29,28 +24,29 @@ public class GravitySim : MonoBehaviour
 
     void Start()
     {
+        Debug.Log(memberArray.Length + " objects registered");
     }
 
     // FixedUpdate is where we do all our physics calculations
     void FixedUpdate()
     {
         Vector3 forceVector;
-        for(int i = 0; i < memberArray.Length; i++)
+        for (int i = 0; i < memberArray.Length - 1; i++)
         {
-            // tracking object's forces get ignored
-            if (tracking)
-            {
-                forceVector = CalculateForce(trackObject, memberArray[i]);
-                memberArray[i].ApplyForce(forceVector * -1f);
-            }
-            // otherwise all objects act on all other objects
-            for(int j = i + 1; j < memberArray.Length; j++)
+            for(int j = i+1; j < memberArray.Length; j++)
             {
                 forceVector = CalculateForce(memberArray[i], memberArray[j]);
                 memberArray[i].ApplyForce(forceVector);
                 memberArray[j].ApplyForce(forceVector * -1f);
             }
         }
+        //if(trackObject != null)
+        //{
+        //    for(int i = 0; i < memberArray.Length; i++)
+        //    {
+        //        memberArray[i].transform.position -= trackObject.transform.position;
+        //    }
+        //}
     }
 
     void Update()
