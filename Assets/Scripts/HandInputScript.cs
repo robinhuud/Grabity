@@ -9,12 +9,14 @@ public class HandInputScript : MonoBehaviour
     public GameObject rightAnchor;
     public GravitySim simulationSpace;
     public GravitySimObject projectileTemplate;
+    public float flowRate = 500f;
+    public AudioSource beatMaster;
 
     private static List<InputDevice> inputDevices = new List<InputDevice>();
     private static List<InputFeatureUsage> featureUsages = new List<InputFeatureUsage>();
     private InputDevice leftDevice;
     private InputDevice rightDevice;
-    private bool pressed = false;
+    private bool triggerPressed = false;
     private bool launched = false;
     private GravitySimObject nextProjectile;
 
@@ -76,35 +78,47 @@ public class HandInputScript : MonoBehaviour
     
     void CheckHands()
     {
-        bool button = OVRInput.Get(OVRInput.RawButton.RIndexTrigger);
-        //rightDevice.TryGetFeatureValue(CommonUsages.triggerButton, out button);
-        if (button)
+        bool rightTrigger = false;
+        bool rightGrab = false;
+        if(rightDevice.TryGetFeatureValue(CommonUsages.triggerButton, out rightTrigger))
         {
-            if (!pressed)
+            if (rightTrigger)
             {
-                pressed = true;
-                GrabMoon();
+                if (!triggerPressed)
+                {
+                    triggerPressed = true;
+                    CreateMoon();
+                }
+            }
+            else
+            {
+                if (triggerPressed)
+                {
+                    triggerPressed = false;
+                    ReleaseMoon();
+                }
+            }
+            if (triggerPressed)
+            {
+                nextProjectile.transform.position = rightAnchor.transform.position;
+                nextProjectile.transform.rotation = rightAnchor.transform.rotation;
+                nextProjectile.mass += flowRate * Time.deltaTime;
+                nextProjectile.Reset();
             }
         }
-        else
+        if(rightDevice.TryGetFeatureValue(CommonUsages.gripButton, out rightGrab))
         {
-            if (pressed)
-            {
-                pressed = false;
-                ReleaseMoon();
-            }
-                
+
         }
-        if (pressed)
-        {
-            nextProjectile.transform.position = rightAnchor.transform.position;
-            nextProjectile.transform.rotation = rightAnchor.transform.rotation;
-        }
+ 
+        
     }
 
-    void GrabMoon()
+    void CreateMoon()
     {
         nextProjectile = Instantiate(projectileTemplate);
+        nextProjectile.GetComponent<AudioSource>().enabled = true;
+        nextProjectile.GetComponent<AudioSource>().timeSamples = beatMaster.timeSamples;
     }
 
     void ReleaseMoon()
@@ -112,5 +126,6 @@ public class HandInputScript : MonoBehaviour
         Vector3 launchVelocity = OVRInput.GetLocalControllerVelocity(OVRInput.Controller.RTouch);
         nextProjectile.velocity = launchVelocity;
         simulationSpace.RegisterObject(nextProjectile);
+        Debug.Log("Adding object to sim, pitch: " + nextProjectile.GetComponent<AudioSource>().pitch + " volume: " + nextProjectile.GetComponent<AudioSource>().volume);
     }
 }
