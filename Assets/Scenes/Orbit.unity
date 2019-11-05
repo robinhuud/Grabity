@@ -182,7 +182,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mass: 5e+10
-  density: 24000000
+  density: 2400000
   velocity: {x: 0, y: 0, z: 0}
   worldSim: {fileID: 174659679}
   popClip: {fileID: 0}
@@ -293,6 +293,17 @@ MonoBehaviour:
   projectileTemplate: {fileID: 1983073939}
   flowRate: 500000
   beatMaster: {fileID: 766199761}
+  buttonThreshold: 0.1
+  spawnClips:
+  - {fileID: 8300000, guid: 44a682fc08fbd9243afad84aaf65995b, type: 3}
+  - {fileID: 8300000, guid: 6001e07c3dd60b346acdcd5e660b6eb9, type: 3}
+  - {fileID: 8300000, guid: 01dc749ac99149347a540fe7fee96972, type: 3}
+  - {fileID: 8300000, guid: 07dc52de909f94c4cb02bcfa754f74d5, type: 3}
+  - {fileID: 8300000, guid: a5bbad5546680eb44bd0ad5c4b5af74a, type: 3}
+  - {fileID: 8300000, guid: bfcba0009f053dc44b1592cb8980e8e5, type: 3}
+  - {fileID: 8300000, guid: 01a46d83a668c1248b5a1761e9424199, type: 3}
+  - {fileID: 8300000, guid: 0ee002f3e1621ef4196ab8927956f88f, type: 3}
+  - {fileID: 8300000, guid: 5f3772c3c3dab31499f7a4541aa7cf68, type: 3}
 --- !u!1 &276481262
 GameObject:
   m_ObjectHideFlags: 0
@@ -430,7 +441,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mass: 600000000
   density: 10000000
-  velocity: {x: 5.85, y: 0, z: 0}
+  velocity: {x: 4.75, y: 0, z: 0}
   worldSim: {fileID: 174659679}
   popClip: {fileID: 8300000, guid: bfc870909dc04ef43b84ca1f76998420, type: 3}
   radius: 0
@@ -446,7 +457,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: 13226d7139a7b034f8f92e07a8b005fd, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 0.095
+  m_Volume: 0.25
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -584,7 +595,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 766199759}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalPosition: {x: 0, y: 0, z: -15}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -624,7 +635,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mass: 7000000
   density: 10000000
-  velocity: {x: 7.75, y: 0, z: 0}
+  velocity: {x: 6.5, y: 0, z: 0}
   worldSim: {fileID: 174659679}
   popClip: {fileID: 8300000, guid: bfc870909dc04ef43b84ca1f76998420, type: 3}
   radius: 0
@@ -682,7 +693,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 938766272}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -8.35}
+  m_LocalPosition: {x: 0, y: 0, z: -13.35}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -698,9 +709,9 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 44a682fc08fbd9243afad84aaf65995b, type: 3}
+  m_audioClip: {fileID: 8300000, guid: 3d64d02d52d403246a6bf5c7fc4e18e9, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.25
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -1039,7 +1050,7 @@ MonoBehaviour:
   density: 10000000
   velocity: {x: 0, y: 0, z: 0}
   worldSim: {fileID: 0}
-  popClip: {fileID: 8300000, guid: bfc870909dc04ef43b84ca1f76998420, type: 3}
+  popClip: {fileID: 8300000, guid: 55aa2d135b0404c2f97bd44a6cc0c30a, type: 3}
   radius: 0
 --- !u!23 &1983073940
 MeshRenderer:

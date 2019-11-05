@@ -19,6 +19,7 @@ public class GravitySim : MonoBehaviour
     private Mesh mesh;
     [SerializeField]
     private Material material;
+    private bool loggedFPS = false;
 
     public void CreateEntities()
     {
@@ -80,6 +81,11 @@ public class GravitySim : MonoBehaviour
     // FixedUpdate is where we do all our physics calculations
     void FixedUpdate()
     {
+        if(!loggedFPS)
+        {
+            Debug.Log("SIM FPS is " + Time.fixedDeltaTime);
+            loggedFPS = true;
+        }
         Vector3 forceVector;
         // First apply the gravitational forces to all objects in the simulation
         for (int i = 0; i < memberArray.Length; i++)

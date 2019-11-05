@@ -8,9 +8,9 @@ public class GravitySimSystem : ComponentSystem
 {
     protected override void OnUpdate()
     {
-        Entities.ForEach((ref GS_velocity velocity, ref Translation position) =>
-        {
-            position.Value += velocity.velocity;
-        });
+        //Entities.ForEach((ref GS_velocity velocity, ref Translation position) =>
+        //{
+        //    position.Value += velocity.velocity;
+        //});
     }
 }

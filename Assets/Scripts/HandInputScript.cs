@@ -11,19 +11,24 @@ public class HandInputScript : MonoBehaviour
     public GravitySimObject projectileTemplate;
     public float flowRate = 500f;
     public AudioSource beatMaster;
+    public float buttonThreshold = .1f;
+    [SerializeField]
+    public AudioClip[] spawnClips;
 
     private static List<InputDevice> inputDevices = new List<InputDevice>();
     private static List<InputFeatureUsage> featureUsages = new List<InputFeatureUsage>();
     private InputDevice leftDevice;
     private InputDevice rightDevice;
+    private bool grabPressed = false;
     private bool triggerPressed = false;
     private bool launched = false;
     private GravitySimObject nextProjectile;
+    private int newClip = 0;
 
     // Start is called before the first frame update
     void Start()
     {
-        ConfigHands();
+        CheckClips();
     }
 
     // Update is called once per frame
@@ -33,20 +38,12 @@ public class HandInputScript : MonoBehaviour
         CheckHands();
     }
 
-    void ConfigHands()
+    void CheckClips()
     {
-        
-        //InputDevices.GetDevicesAtXRNode(XRNode.LeftHand, inputDevices);
-        //if (inputDevices.Count >= 1)
-        //    leftDevice = inputDevices[0];
-        //else
-        //    Debug.Log("No device found for LeftHand");
-        //InputDevices.GetDevicesAtXRNode(XRNode.RightHand, inputDevices);
-        //if (inputDevices.Count >= 1)
-        //    rightDevice = inputDevices[0];
-        //else
-        //    Debug.Log("No device found for rightHand");
-            
+        if(spawnClips.Length < 2)
+        {
+            Debug.Log("Less than 2 Audio Loops, please provide more");
+        }
     }
 
     void UpdateTracking()
@@ -80,43 +77,62 @@ public class HandInputScript : MonoBehaviour
     {
         bool rightTrigger = false;
         bool rightGrab = false;
-        if(rightDevice.TryGetFeatureValue(CommonUsages.triggerButton, out rightTrigger))
+        rightTrigger = OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger);
+        rightGrab = OVRInput.Get(OVRInput.Button.SecondaryHandTrigger);
+        if (rightTrigger)
         {
-            if (rightTrigger)
+            if (!triggerPressed)
             {
-                if (!triggerPressed)
-                {
-                    triggerPressed = true;
-                    CreateMoon();
-                }
+                triggerPressed = true;
+                CreateMoon();
             }
-            else
-            {
-                if (triggerPressed)
-                {
-                    triggerPressed = false;
-                    ReleaseMoon();
-                }
-            }
+        }
+        else
+        {
             if (triggerPressed)
             {
-                nextProjectile.transform.position = rightAnchor.transform.position;
-                nextProjectile.transform.rotation = rightAnchor.transform.rotation;
-                nextProjectile.mass += flowRate * Time.deltaTime;
-                nextProjectile.Reset();
+                triggerPressed = false;
+                ReleaseMoon();
             }
         }
-        if(rightDevice.TryGetFeatureValue(CommonUsages.gripButton, out rightGrab))
+        if (triggerPressed)
         {
-
+            nextProjectile.transform.position = rightAnchor.transform.position;
+            nextProjectile.transform.rotation = rightAnchor.transform.rotation;
+            nextProjectile.mass += flowRate * Time.deltaTime;
+            nextProjectile.Reset();
         }
- 
-        
+        if(rightGrab)
+        {
+            if(!grabPressed)
+            {
+                if(triggerPressed)
+                {
+                    nextProjectile.GetComponent<AudioSource>().enabled = false;
+                    newClip++;
+                    if (newClip >= spawnClips.Length)
+                    {
+                        newClip = 0;
+                    }
+                    nextProjectile.GetComponent<AudioSource>().clip = spawnClips[newClip];
+                    nextProjectile.GetComponent<AudioSource>().enabled = true;
+                    nextProjectile.GetComponent<AudioSource>().timeSamples = beatMaster.timeSamples;
+                }
+                grabPressed = true;
+            }
+        } else
+        {
+            if(grabPressed)
+            {
+                grabPressed = false;
+            }
+        }
     }
 
     void CreateMoon()
     {
         nextProjectile = Instantiate(projectileTemplate);
+        nextProjectile.GetComponent<AudioSource>().clip = spawnClips[newClip];
         nextProjectile.GetComponent<AudioSource>().enabled = true;
         nextProjectile.GetComponent<AudioSource>().timeSamples = beatMaster.timeSamples;
     }
