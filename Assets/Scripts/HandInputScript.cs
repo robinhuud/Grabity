@@ -75,11 +75,11 @@ public class HandInputScript : MonoBehaviour
     
     void CheckHands()
     {
-        bool rightTrigger = false;
+        float rightTrigger = 0;
         bool rightGrab = false;
-        rightTrigger = OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger);
-        rightGrab = OVRInput.Get(OVRInput.Button.SecondaryHandTrigger);
-        if (rightTrigger)
+        rightTrigger = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, OVRInput.Controller.RTouch);
+        rightGrab = OVRInput.Get(OVRInput.Button.PrimaryHandTrigger);
+        if (rightTrigger > buttonThreshold)
         {
             if (!triggerPressed)
             {
@@ -99,7 +99,7 @@ public class HandInputScript : MonoBehaviour
         {
             nextProjectile.transform.position = rightAnchor.transform.position;
             nextProjectile.transform.rotation = rightAnchor.transform.rotation;
-            nextProjectile.mass += flowRate * Time.deltaTime;
+            nextProjectile.mass += flowRate * rightTrigger * Time.deltaTime;
             nextProjectile.Reset();
         }
         if(rightGrab)

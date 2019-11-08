@@ -69,8 +69,9 @@ public class GravitySimObject : MonoBehaviour
         worldSim.UnregisterObject(this);
         if (audioSource != null && popClip != null)
         {
+            audioSource.Stop();
             audioSource.PlayOneShot(popClip);
-            IEnumerator coroutine = SetActiveAfter(false, popClip.length);
+            IEnumerator coroutine = PlaySoundThenDie(popClip.length);
             StartCoroutine(coroutine);
         }
         else
@@ -79,8 +80,9 @@ public class GravitySimObject : MonoBehaviour
         }
     }
 
-    public IEnumerator SetActiveAfter(bool activation, float delay)
+    public IEnumerator PlaySoundThenDie(float delay)
     {
+        this.GetComponent<MeshRenderer>().enabled = false;
         yield return new WaitForSeconds(delay);
         this.transform.gameObject.SetActive(false);
         yield return false;
