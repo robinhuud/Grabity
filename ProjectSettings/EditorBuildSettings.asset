@@ -8,10 +8,10 @@ EditorBuildSettings:
   - enabled: 0
     path: 
     guid: 00000000000000000000000000000000
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/GrabityMain.unity
     guid: b672ae7c37bed914eb2d2cf658ce42bc
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Orbit.unity
     guid: 00050fa4b37718c41bee7ea4e46f9cf7
   m_configObjects: {}

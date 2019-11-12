@@ -86,7 +86,6 @@ public class OVRControllerHelper : MonoBehaviour
 			activeControllerType = ControllerType.GearVR;
 		}
 #endif
-		Debug.LogFormat("OVRControllerHelp: Active controller type: {0} for product {1}", activeControllerType, OVRPlugin.productName);
 		if ((activeControllerType != ControllerType.GearVR) && (activeControllerType != ControllerType.Go))
 		{
 			if (m_controller == OVRInput.Controller.LTrackedRemote)
@@ -128,6 +127,7 @@ public class OVRControllerHelper : MonoBehaviour
 			}
 			else if (activeControllerType == ControllerType.QuestAndRiftS)
 			{
+                Debug.Log("Why?????, ControllerConnected: "+controllerConnected + ", m_controller = " + m_controller);
 				m_modelOculusGoController.SetActive(false);
 				m_modelGearVrController.SetActive(false);
 				m_modelOculusTouchQuestAndRiftSLeftController.SetActive(controllerConnected && (m_controller == OVRInput.Controller.LTouch));
