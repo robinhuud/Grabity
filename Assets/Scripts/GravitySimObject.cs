@@ -58,10 +58,10 @@ public class GravitySimObject : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         if (audioSource != null)
         {
-            float logVal = Mathf.Log(mass * .1f);
+            float logVal = Mathf.Log(mass,10f);
             //audioSource.pitch = 8f - logVal;
-            audioSource.volume = logVal / 12f;
-            Debug.Log(this.gameObject.name + " Pitch:" + audioSource.pitch + ", Vol:" + audioSource.volume);
+            audioSource.volume = 1f - (1f / logVal);
+            //Debug.Log(this.gameObject.name + " Pitch:" + audioSource.pitch + ", Vol:" + audioSource.volume);
         }
     }
     public void Poof()

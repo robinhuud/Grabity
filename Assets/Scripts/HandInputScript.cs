@@ -12,6 +12,7 @@ public class HandInputScript : MonoBehaviour
     public float flowRate = 500f;
     public AudioSource beatMaster;
     public float buttonThreshold = .1f;
+    public Material newMoonMaterial;
     [SerializeField]
     public AudioClip[] spawnClips;
 
@@ -141,6 +142,7 @@ public class HandInputScript : MonoBehaviour
     {
         Vector3 launchVelocity = OVRInput.GetLocalControllerVelocity(OVRInput.Controller.RTouch);
         nextProjectile.velocity = launchVelocity;
+        nextProjectile.GetComponent<MeshRenderer>().material = newMoonMaterial;
         simulationSpace.RegisterObject(nextProjectile);
         Debug.Log("Adding object to sim, pitch: " + nextProjectile.GetComponent<AudioSource>().pitch + " volume: " + nextProjectile.GetComponent<AudioSource>().volume);
     }
