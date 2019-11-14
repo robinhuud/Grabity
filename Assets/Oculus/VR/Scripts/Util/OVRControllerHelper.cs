@@ -70,8 +70,11 @@ public class OVRControllerHelper : MonoBehaviour
 	void Start()
 	{
 #if UNITY_EDITOR || !UNITY_ANDROID
-		// to do: handle Rift S after SDK update
-		activeControllerType = ControllerType.Rift;
+        Debug.Log("productName: " + OVRPlugin.productName);
+        // to do: handle Rift S after SDK update
+        // WTF Oculus?!? so you hard-code to the obsolete headset type?!?!!
+        //activeControllerType = ControllerType.Rift;
+        activeControllerType = ControllerType.QuestAndRiftS;
 #else
 		if (OVRPlugin.productName == "Oculus Go")
 		{
@@ -86,7 +89,7 @@ public class OVRControllerHelper : MonoBehaviour
 			activeControllerType = ControllerType.GearVR;
 		}
 #endif
-		if ((activeControllerType != ControllerType.GearVR) && (activeControllerType != ControllerType.Go))
+        if ((activeControllerType != ControllerType.GearVR) && (activeControllerType != ControllerType.Go))
 		{
 			if (m_controller == OVRInput.Controller.LTrackedRemote)
 			{
