@@ -81,21 +81,31 @@ public class GravitySim : MonoBehaviour
     // FixedUpdate is where we do all our physics calculations
     void FixedUpdate()
     {
+        if(!loggedFPS)
+        {
+            Debug.Log("SIM FPS is " + Time.fixedDeltaTime);
+            loggedFPS = true;
+        }
         Vector3 forceVector;
         // First apply the gravitational forces to all objects in the simulation
-        for (int i = 0; i < memberArray.Length; i++)
+        //Debug.Log("FixedUpdate GravitySim memberArray.Length is " + memberArray.Length);
+        if(memberArray.Length > 1)
         {
-            for (int j = i + 1; j < memberArray.Length; j++)
+            for (int i = 0; i < memberArray.Length; i++)
             {
-                forceVector = CalculateForce(memberArray[i], memberArray[j]);
-                if (0.5f * (memberArray[i].radius + memberArray[j].radius) > (memberArray[i].transform.position - memberArray[j].transform.position).magnitude)
+                for (int j = i + 1; j < memberArray.Length; j++)
                 {
-                    Collide(memberArray[i], memberArray[j]);
+                    forceVector = CalculateForce(memberArray[i], memberArray[j]);
+                    if (0.5f * (memberArray[i].radius + memberArray[j].radius) > (memberArray[i].transform.position - memberArray[j].transform.position).magnitude)
+                    {
+                        Collide(memberArray[i], memberArray[j]);
+                    }
+                    memberArray[i].ApplyForce(forceVector);
+                    memberArray[j].ApplyForce(forceVector * -1f);
                 }
-                memberArray[i].ApplyForce(forceVector);
-                memberArray[j].ApplyForce(forceVector * -1f);
             }
         }
+
         if (trackObject != null)
         {
             // If we are tracking an object, we subtract it's velocity from everything in the simulation so that it looks like its
