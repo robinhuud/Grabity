@@ -26,6 +26,11 @@ public class HandInputScript : MonoBehaviour
     private GravitySimObject nextProjectile;
     private int newClip = 0;
 
+    void Awake()
+    {
+        // just in case you for got to un-set the world sim in the template object.
+        projectileTemplate.worldSim = null;
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -79,7 +84,7 @@ public class HandInputScript : MonoBehaviour
         float rightTrigger = 0;
         bool rightGrab = false;
         rightTrigger = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, OVRInput.Controller.RTouch);
-        rightGrab = OVRInput.Get(OVRInput.Button.PrimaryHandTrigger);
+        rightGrab = OVRInput.Get(OVRInput.Button.PrimaryHandTrigger, OVRInput.Controller.RTouch);
         if (rightTrigger > buttonThreshold)
         {
             if (!triggerPressed)

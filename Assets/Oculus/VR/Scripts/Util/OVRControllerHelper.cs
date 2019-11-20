@@ -130,7 +130,7 @@ public class OVRControllerHelper : MonoBehaviour
 			}
 			else if (activeControllerType == ControllerType.QuestAndRiftS)
 			{
-                Debug.Log("Why?????, ControllerConnected: "+controllerConnected + ", m_controller = " + m_controller);
+                Debug.Log("Quest or Rift-S ControllerConnected: "+controllerConnected + ", m_controller = " + m_controller);
 				m_modelOculusGoController.SetActive(false);
 				m_modelGearVrController.SetActive(false);
 				m_modelOculusTouchQuestAndRiftSLeftController.SetActive(controllerConnected && (m_controller == OVRInput.Controller.LTouch));

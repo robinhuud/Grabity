@@ -19,16 +19,17 @@ public class GravitySimObject : MonoBehaviour
     // Called before scene starts, before any Update is called on any object
     public void Awake()
     {
-        if(worldSim != null)
+        if(worldSim != null && this.isActiveAndEnabled)
         {
             worldSim.RegisterObject(this);
         }
+        //Debug.Log("AWAKE: " + this.velocity);
     }
     // Start is called before the first frame update
     void Start()
     {
         Reset();
-        
+        //Debug.Log("START: " + this.velocity);
     }
 
     void Update()
@@ -38,14 +39,21 @@ public class GravitySimObject : MonoBehaviour
             dirty = false;
             Reset();
         }
-        this.transform.position += this.velocity * Time.deltaTime;
+        //Debug.Log("velocity is " + this.velocity + " time.deltaTime is " + Time.deltaTime);
+
+        //this.transform.position += this.velocity * Time.deltaTime;
+    }
+
+    void FixedUpdate()
+    {
+        this.transform.position += this.velocity * Time.fixedDeltaTime;
     }
 
     // This is the place where we apply the force. Can be done multiple times per physics frame (FixedUpdate)
     // if you need to but make sure you scale the forces appropriately.
     public void ApplyForce(Vector3 force)
     {
-        //Debug.Log("Applied Force " + force.magnitude);
+        //Debug.Log("Applied Force " + force + " / " + mass);
         this.velocity += force / mass;
     }
     public void Reset()
@@ -58,16 +66,16 @@ public class GravitySimObject : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         if (audioSource != null)
         {
-            float logVal = Mathf.Log(mass,10f);
+            float logVal = Mathf.Log(mass * .1f);
             //audioSource.pitch = 8f - logVal;
-            audioSource.volume = 1f - (1f / logVal);
+            audioSource.volume = logVal / 12f;
             //Debug.Log(this.gameObject.name + " Pitch:" + audioSource.pitch + ", Vol:" + audioSource.volume);
         }
     }
     public void Poof()
     {
         worldSim.UnregisterObject(this);
-        if (audioSource != null && popClip != null)
+        if (audioSource != null && popClip != null && audioSource.isActiveAndEnabled)
         {
             audioSource.Stop();
             audioSource.PlayOneShot(popClip);

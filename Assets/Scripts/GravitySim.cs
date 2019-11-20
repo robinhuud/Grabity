@@ -19,7 +19,6 @@ public class GravitySim : MonoBehaviour
     private Mesh mesh;
     [SerializeField]
     private Material material;
-    private bool loggedFPS = false;
 
     public void CreateEntities()
     {
@@ -83,19 +82,24 @@ public class GravitySim : MonoBehaviour
     {
         Vector3 forceVector;
         // First apply the gravitational forces to all objects in the simulation
-        for (int i = 0; i < memberArray.Length; i++)
+        //Debug.Log("FixedUpdate GravitySim memberArray.Length is " + memberArray.Length);
+        if(memberArray.Length > 1)
         {
-            for (int j = i + 1; j < memberArray.Length; j++)
+            for (int i = 0; i < memberArray.Length; i++)
             {
-                forceVector = CalculateForce(memberArray[i], memberArray[j]);
-                if (0.5f * (memberArray[i].radius + memberArray[j].radius) > (memberArray[i].transform.position - memberArray[j].transform.position).magnitude)
+                for (int j = i + 1; j < memberArray.Length; j++)
                 {
-                    Collide(memberArray[i], memberArray[j]);
+                    forceVector = CalculateForce(memberArray[i], memberArray[j]);
+                    if (0.5f * (memberArray[i].radius + memberArray[j].radius) > (memberArray[i].transform.position - memberArray[j].transform.position).magnitude)
+                    {
+                        Collide(memberArray[i], memberArray[j]);
+                    }
+                    memberArray[i].ApplyForce(forceVector);
+                    memberArray[j].ApplyForce(forceVector * -1f);
                 }
-                memberArray[i].ApplyForce(forceVector);
-                memberArray[j].ApplyForce(forceVector * -1f);
             }
         }
+
         if (trackObject != null)
         {
             // If we are tracking an object, we subtract it's velocity from everything in the simulation so that it looks like its
@@ -138,10 +142,11 @@ public class GravitySim : MonoBehaviour
     // Calculate the gravitational force on obj1 applied by obj2
     private Vector3 CalculateForce(GravitySimObject obj1, GravitySimObject obj2)
     {
-        float dSquared = (obj1.transform.position - obj2.transform.position).sqrMagnitude;
+        Vector3 delta = obj2.transform.position - obj1.transform.position;
+        float sqrMag = delta.sqrMagnitude;
         // use the Square of the distance to calculate the force
-        float f = GravitationalConstant * ((obj1.mass * obj2.mass) / dSquared);
+        float f = sqrMag == 0 ? 0 : GravitationalConstant * ((obj1.mass * obj2.mass) / sqrMag);
         // now make a vector with that force applied in the correct direction
-        return (obj2.transform.position - obj1.transform.position).normalized * f;
+        return (delta).normalized * f;
     }
 }
