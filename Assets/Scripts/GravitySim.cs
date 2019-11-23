@@ -147,6 +147,6 @@ public class GravitySim : MonoBehaviour
         // use the Square of the distance to calculate the force
         float f = sqrMag == 0 ? 0 : GravitationalConstant * ((obj1.mass * obj2.mass) / sqrMag);
         // now make a vector with that force applied in the correct direction
-        return (delta).normalized * f;
+        return delta.normalized * f;
     }
 }

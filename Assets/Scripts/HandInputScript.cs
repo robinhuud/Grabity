@@ -18,8 +18,8 @@ public class HandInputScript : MonoBehaviour
 
     private static List<InputDevice> inputDevices = new List<InputDevice>();
     private static List<InputFeatureUsage> featureUsages = new List<InputFeatureUsage>();
-    private InputDevice leftDevice;
-    private InputDevice rightDevice;
+    private OVRInput.Controller leftDevice = OVRInput.Controller.LTouch;
+    private OVRInput.Controller rightDevice = OVRInput.Controller.RTouch;
     private bool grabPressed = false;
     private bool triggerPressed = false;
     private bool launched = false;
@@ -41,7 +41,7 @@ public class HandInputScript : MonoBehaviour
     void Update()
     {
         UpdateTracking();
-        CheckHands();
+        CheckTriggers();
     }
 
     void CheckClips()
@@ -54,37 +54,18 @@ public class HandInputScript : MonoBehaviour
 
     void UpdateTracking()
     {
-        // update the position / rotation of the anchors.
-        //Vector3 pos;
-        //Quaternion rot;
-        //if (leftDevice.TryGetFeatureValue(CommonUsages.devicePosition, out pos))
-        //{
-        //    leftAnchor.transform.localPosition = pos;
-        //}
-        //if (leftDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out rot))
-        //{
-        //    leftAnchor.transform.rotation = rot;
-        //}
-        //if (rightDevice.TryGetFeatureValue(CommonUsages.devicePosition, out pos))
-        //{
-        //    rightAnchor.transform.localPosition = pos;
-        //}
-        //if (rightDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out rot))
-        //{
-        //    rightAnchor.transform.rotation = rot;
-        //}
         leftAnchor.transform.localPosition = OVRInput.GetLocalControllerPosition(OVRInput.Controller.LTouch);
         leftAnchor.transform.rotation = OVRInput.GetLocalControllerRotation(OVRInput.Controller.LTouch);
         rightAnchor.transform.localPosition = OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch);
         rightAnchor.transform.rotation = OVRInput.GetLocalControllerRotation(OVRInput.Controller.RTouch);
     }
     
-    void CheckHands()
+    void CheckTriggers()
     {
-        float rightTrigger = 0;
-        bool rightGrab = false;
-        rightTrigger = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, OVRInput.Controller.RTouch);
-        rightGrab = OVRInput.Get(OVRInput.Button.PrimaryHandTrigger, OVRInput.Controller.RTouch);
+        float rightTrigger = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, OVRInput.Controller.RTouch);
+        float rightGrab = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, OVRInput.Controller.RTouch);
+        float leftTrigger = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, OVRInput.Controller.LTouch);
+        float leftGrab = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, OVRInput.Controller.LTouch);
         if (rightTrigger > buttonThreshold)
         {
             if (!triggerPressed)
@@ -108,7 +89,7 @@ public class HandInputScript : MonoBehaviour
             nextProjectile.mass += flowRate * rightTrigger * Time.deltaTime;
             nextProjectile.Reset();
         }
-        if(rightGrab)
+        if(rightGrab > buttonThreshold)
         {
             if(!grabPressed)
             {

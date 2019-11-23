@@ -95,4 +95,9 @@ public class GravitySimObject : MonoBehaviour
         this.transform.gameObject.SetActive(false);
         yield return false;
     }
+
+    public void OnTriggerEnter(Collider other)
+    {
+        Poof();
+    }
 }
