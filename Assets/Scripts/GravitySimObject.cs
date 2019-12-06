@@ -14,6 +14,7 @@ public class GravitySimObject : MonoBehaviour
     public float radius;
     private float volume;
     private bool dirty = true;
+    private bool isDead = false;
     private AudioSource audioSource;
 
     // Called before scene starts, before any Update is called on any object
@@ -74,17 +75,25 @@ public class GravitySimObject : MonoBehaviour
     }
     public void Poof()
     {
-        worldSim.UnregisterObject(this);
-        if (audioSource != null && popClip != null && audioSource.isActiveAndEnabled)
+        if(!isDead) // Don't do anything if you're already dead.
         {
-            audioSource.Stop();
-            audioSource.PlayOneShot(popClip);
-            IEnumerator coroutine = PlaySoundThenDie(popClip.length);
-            StartCoroutine(coroutine);
-        }
-        else
+            isDead = true;
+            worldSim.UnregisterObject(this);
+            if (audioSource != null && popClip != null && audioSource.isActiveAndEnabled)
+            {
+                audioSource.Stop();
+                audioSource.PlayOneShot(popClip);
+                GetComponent<ParticleSystem>().Stop();
+                IEnumerator coroutine = PlaySoundThenDie(popClip.length);
+                StartCoroutine(coroutine);
+            }
+            else
+            {
+                this.transform.gameObject.SetActive(false);
+            }
+        } else
         {
-            this.transform.gameObject.SetActive(false);
+            Debug.Log("Already dead");
         }
     }
 
@@ -98,6 +107,10 @@ public class GravitySimObject : MonoBehaviour
 
     public void OnTriggerEnter(Collider other)
     {
-        Poof();
+        // If other object is in the Gravity Simulation, then it's collision is already handled.
+        if(!other.gameObject.GetComponent<GravitySimObject>())
+        {
+            Poof();
+        }
     }
 }

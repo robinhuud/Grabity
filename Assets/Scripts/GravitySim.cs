@@ -20,33 +20,6 @@ public class GravitySim : MonoBehaviour
     [SerializeField]
     private Material material;
 
-    public void CreateEntities()
-    {
-        EntityManager entityManager = World.Active.EntityManager;
-        EntityArchetype GS_object = entityManager.CreateArchetype(
-            typeof(GS_mass),
-            typeof(GS_radius),
-            typeof(GS_density),
-            typeof(Translation),
-            typeof(GS_velocity),
-            typeof(RenderMesh)
-        );
-        NativeArray<Entity> entityArray = new NativeArray<Entity>(memberArray.Length, Allocator.Temp);
-        entityManager.CreateEntity(GS_object, entityArray);
-        for(int i = 0; i < entityArray.Length; i++)
-        {
-            entityManager.SetComponentData(entityArray[i], new GS_mass { mass = memberArray[i].mass });
-            entityManager.SetComponentData(entityArray[i], new Translation { Value = memberArray[i].transform.position });
-            entityManager.SetComponentData(entityArray[i], new GS_velocity { velocity = memberArray[i].velocity });
-            entityManager.SetSharedComponentData(entityArray[i], new RenderMesh
-            {
-                mesh = mesh,
-                material = material
-            });
-        }
-        entityArray.Dispose();
-    }
-
     // Register method allows GravitySimObjects to register in this simulation
     // re-creates the array each time the list is updated.
     public void RegisterObject(GravitySimObject obj)
@@ -65,7 +38,6 @@ public class GravitySim : MonoBehaviour
     void Start()
     {
         memberArray = members.ToArray();
-        CreateEntities();
     }
 
     void Update()

@@ -16,14 +16,12 @@ public class HandInputScript : MonoBehaviour
     [SerializeField]
     public AudioClip[] spawnClips;
 
-    private static List<InputDevice> inputDevices = new List<InputDevice>();
-    private static List<InputFeatureUsage> featureUsages = new List<InputFeatureUsage>();
-    private OVRInput.Controller leftDevice = OVRInput.Controller.LTouch;
-    private OVRInput.Controller rightDevice = OVRInput.Controller.RTouch;
-    private bool grabPressed = false;
-    private bool triggerPressed = false;
-    private bool launched = false;
-    private GravitySimObject nextProjectile;
+    private bool rightGrabPressed = false;
+    private bool rightTriggerPressed = false;
+    private bool leftGrabPressed = false;
+    private bool leftTriggerPressed = false;
+    private GravitySimObject nextProjectileLeft;
+    private GravitySimObject nextProjectileRight;
     private int newClip = 0;
 
     void Awake()
@@ -68,68 +66,76 @@ public class HandInputScript : MonoBehaviour
         float leftGrab = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, OVRInput.Controller.LTouch);
         if (rightTrigger > buttonThreshold)
         {
-            if (!triggerPressed)
+            if (!rightTriggerPressed)
             {
-                triggerPressed = true;
-                CreateMoon();
+                rightTriggerPressed = true;
+                CreateMoon(ref nextProjectileRight, OVRInput.Controller.RTouch);
             }
         }
         else
         {
-            if (triggerPressed)
+            if (rightTriggerPressed)
             {
-                triggerPressed = false;
-                ReleaseMoon();
+                rightTriggerPressed = false;
+                ReleaseMoon(ref nextProjectileRight, OVRInput.Controller.RTouch);
             }
         }
-        if (triggerPressed)
+        if (rightTriggerPressed)
         {
-            nextProjectile.transform.position = rightAnchor.transform.position;
-            nextProjectile.transform.rotation = rightAnchor.transform.rotation;
-            nextProjectile.mass += flowRate * rightTrigger * Time.deltaTime;
-            nextProjectile.Reset();
+            nextProjectileRight.transform.position = rightAnchor.transform.position;
+            nextProjectileRight.transform.rotation = rightAnchor.transform.rotation;
+            nextProjectileRight.mass += flowRate * rightTrigger * Time.deltaTime;
+            nextProjectileRight.Reset();
         }
         if(rightGrab > buttonThreshold)
         {
-            if(!grabPressed)
+            if(!rightGrabPressed)
             {
-                if(triggerPressed)
+                if(rightTriggerPressed)
                 {
-                    nextProjectile.GetComponent<AudioSource>().enabled = false;
-                    newClip++;
-                    if (newClip >= spawnClips.Length)
-                    {
-                        newClip = 0;
-                    }
-                    nextProjectile.GetComponent<AudioSource>().clip = spawnClips[newClip];
-                    nextProjectile.GetComponent<AudioSource>().enabled = true;
-                    nextProjectile.GetComponent<AudioSource>().timeSamples = beatMaster.timeSamples;
+                    NextClip(ref nextProjectileRight);
                 }
-                grabPressed = true;
+                rightGrabPressed = true;
             }
         } else
         {
-            if(grabPressed)
+            if(rightGrabPressed)
             {
-                grabPressed = false;
+                rightGrabPressed = false;
             }
         }
     }
 
-    void CreateMoon()
+    void NextClip(ref GravitySimObject projectile)
     {
-        nextProjectile = Instantiate(projectileTemplate);
-        nextProjectile.GetComponent<AudioSource>().clip = spawnClips[newClip];
-        nextProjectile.GetComponent<AudioSource>().enabled = true;
-        nextProjectile.GetComponent<AudioSource>().timeSamples = beatMaster.timeSamples;
+        AudioSource aSource = projectile.GetComponent<AudioSource>();
+        aSource.enabled = false;
+        newClip++;
+        if(newClip >= spawnClips.Length)
+        {
+            newClip = 0;
+        }
+        aSource.clip = spawnClips[newClip];
+        Debug.Log("Clip is " + newClip);
+        aSource.timeSamples = beatMaster.timeSamples;
+        aSource.enabled = true;
+        
     }
 
-    void ReleaseMoon()
+    void CreateMoon(ref GravitySimObject projectile, OVRInput.Controller controller)
     {
-        Vector3 launchVelocity = OVRInput.GetLocalControllerVelocity(OVRInput.Controller.RTouch);
-        nextProjectile.velocity = launchVelocity;
-        nextProjectile.GetComponent<MeshRenderer>().material = newMoonMaterial;
-        simulationSpace.RegisterObject(nextProjectile);
-        Debug.Log("Adding object to sim, pitch: " + nextProjectile.GetComponent<AudioSource>().pitch + " volume: " + nextProjectile.GetComponent<AudioSource>().volume);
+        projectile = Instantiate(projectileTemplate);
+        projectile.GetComponent<AudioSource>().clip = spawnClips[newClip];
+        projectile.GetComponent<AudioSource>().enabled = true;
+        projectile.GetComponent<AudioSource>().timeSamples = beatMaster.timeSamples;
+    }
+
+    void ReleaseMoon(ref GravitySimObject projectile, OVRInput.Controller controller)
+    {
+        Vector3 launchVelocity = OVRInput.GetLocalControllerVelocity(controller);
+        projectile.velocity = launchVelocity;
+        projectile.GetComponent<MeshRenderer>().material = newMoonMaterial;
+        simulationSpace.RegisterObject(projectile);
+        Debug.Log("Adding object to sim, pitch: " + nextProjectileRight.GetComponent<AudioSource>().pitch + " volume: " + projectile.GetComponent<AudioSource>().volume);
     }
 }
