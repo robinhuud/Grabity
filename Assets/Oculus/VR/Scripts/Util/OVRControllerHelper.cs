@@ -69,27 +69,40 @@ public class OVRControllerHelper : MonoBehaviour
 
 	void Start()
 	{
+		OVRPlugin.SystemHeadset headset = OVRPlugin.GetSystemHeadsetType();
+		switch (headset)
+		{
+			case OVRPlugin.SystemHeadset.Oculus_Go:
+				activeControllerType = ControllerType.Go;
+				break;
+			case OVRPlugin.SystemHeadset.Oculus_Quest:
+				activeControllerType = ControllerType.QuestAndRiftS;
+				break;
+			case OVRPlugin.SystemHeadset.Rift_CV1:
+				activeControllerType = ControllerType.Rift;
+				break;
+			case OVRPlugin.SystemHeadset.Rift_S:
+				activeControllerType = ControllerType.QuestAndRiftS;
+				break;
+			case OVRPlugin.SystemHeadset.GearVR_R320:
+			case OVRPlugin.SystemHeadset.GearVR_R321:
+			case OVRPlugin.SystemHeadset.GearVR_R322:
+			case OVRPlugin.SystemHeadset.GearVR_R323:
+			case OVRPlugin.SystemHeadset.GearVR_R324:
+			case OVRPlugin.SystemHeadset.GearVR_R325:
+				activeControllerType = ControllerType.GearVR;
+				break;
+			default:
 #if UNITY_EDITOR || !UNITY_ANDROID
-        Debug.Log("productName: " + OVRPlugin.productName);
-        // to do: handle Rift S after SDK update
-        // WTF Oculus?!? so you hard-code to the obsolete headset type?!?!!
-        //activeControllerType = ControllerType.Rift;
-        activeControllerType = ControllerType.QuestAndRiftS;
+				activeControllerType = ControllerType.Rift;
 #else
-		if (OVRPlugin.productName == "Oculus Go")
-		{
-			activeControllerType = ControllerType.Go;
-		}
-		else if (OVRPlugin.productName == "Oculus Quest")
-		{
-			activeControllerType = ControllerType.QuestAndRiftS;
-		}
-		else
-		{
-			activeControllerType = ControllerType.GearVR;
-		}
+				activeControllerType = ControllerType.GearVR;
 #endif
-        if ((activeControllerType != ControllerType.GearVR) && (activeControllerType != ControllerType.Go))
+				break;
+		}
+
+		Debug.LogFormat("OVRControllerHelp: Active controller type: {0} for product {1}", activeControllerType, OVRPlugin.productName);
+		if ((activeControllerType != ControllerType.GearVR) && (activeControllerType != ControllerType.Go))
 		{
 			if (m_controller == OVRInput.Controller.LTrackedRemote)
 			{
@@ -130,7 +143,6 @@ public class OVRControllerHelper : MonoBehaviour
 			}
 			else if (activeControllerType == ControllerType.QuestAndRiftS)
 			{
-                Debug.Log("Quest or Rift-S ControllerConnected: "+controllerConnected + ", m_controller = " + m_controller);
 				m_modelOculusGoController.SetActive(false);
 				m_modelGearVrController.SetActive(false);
 				m_modelOculusTouchQuestAndRiftSLeftController.SetActive(controllerConnected && (m_controller == OVRInput.Controller.LTouch));
