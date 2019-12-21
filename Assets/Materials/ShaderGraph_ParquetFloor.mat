@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: LWRP_ParquetFloor
+  m_Name: ShaderGraph_ParquetFloor
   m_Shader: {fileID: -6465566751694194690, guid: fea78d500bb8f3844b5ba24178058f42,
     type: 3}
   m_ShaderKeywords: 
