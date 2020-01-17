@@ -45,6 +45,7 @@ public class GravitySimObject : MonoBehaviour
         //this.transform.position += this.velocity * Time.deltaTime;
     }
 
+    // FixedUpdate is for physics calculations, in this case, movement based on velocity.
     void FixedUpdate()
     {
         this.transform.position += this.velocity * Time.fixedDeltaTime;
@@ -73,17 +74,20 @@ public class GravitySimObject : MonoBehaviour
             //Debug.Log(this.gameObject.name + " Pitch:" + audioSource.pitch + ", Vol:" + audioSource.volume);
         }
     }
-    public void Poof()
+    public void Destroy()
     {
         if(!isDead) // Don't do anything if you're already dead.
         {
             isDead = true;
             worldSim.UnregisterObject(this);
+            if(null != GetComponent<ParticleSystem>())
+            {
+                GetComponent<ParticleSystem>().Stop();
+            }
             if (audioSource != null && popClip != null && audioSource.isActiveAndEnabled)
             {
                 audioSource.Stop();
                 audioSource.PlayOneShot(popClip);
-                GetComponent<ParticleSystem>().Stop();
                 IEnumerator coroutine = PlaySoundThenDie(popClip.length);
                 StartCoroutine(coroutine);
             }
@@ -99,7 +103,13 @@ public class GravitySimObject : MonoBehaviour
 
     public IEnumerator PlaySoundThenDie(float delay)
     {
-        this.GetComponent<MeshRenderer>().enabled = false;
+        if(GetComponentInChildren<MeshRenderer>())
+        {
+            GetComponentInChildren<MeshRenderer>().enabled = false;
+        } else if(GetComponentInChildren<SkinnedMeshRenderer>())
+        {
+            GetComponentInChildren<SkinnedMeshRenderer>().enabled = false;
+        }
         yield return new WaitForSeconds(delay);
         this.transform.gameObject.SetActive(false);
         yield return false;
@@ -110,7 +120,7 @@ public class GravitySimObject : MonoBehaviour
         // If other object is in the Gravity Simulation, then it's collision is already handled.
         if(!other.gameObject.GetComponent<GravitySimObject>())
         {
-            Poof();
+            Destroy();
         }
     }
 }

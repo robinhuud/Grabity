@@ -9,16 +9,12 @@ using Unity.Rendering;
 
 public class GravitySim : MonoBehaviour
 {
-    public float GravitationalConstant = .0000000000667f;
+    public float GravitationalConstant = 6.67e-11f;
+    public GravitySimObject trackObject;
     private List<GravitySimObject> members = new List<GravitySimObject>();
     private GravitySimObject[] memberArray;
     private bool tracking = false;
     private bool dirty = true;
-    public GravitySimObject trackObject;
-    [SerializeField]
-    private Mesh mesh;
-    [SerializeField]
-    private Material material;
 
     // Register method allows GravitySimObjects to register in this simulation
     // re-creates the array each time the list is updated.
@@ -54,7 +50,7 @@ public class GravitySim : MonoBehaviour
     {
         Vector3 forceVector;
         // First apply the gravitational forces to all objects in the simulation
-        //Debug.Log("FixedUpdate GravitySim memberArray.Length is " + memberArray.Length);
+        Debug.Log("FixedUpdate GravitySim memberArray.Length is " + memberArray.Length);
         if(memberArray.Length > 1)
         {
             for (int i = 0; i < memberArray.Length; i++)
@@ -64,6 +60,8 @@ public class GravitySim : MonoBehaviour
                     forceVector = CalculateForce(memberArray[i], memberArray[j]);
                     if (0.5f * (memberArray[i].radius + memberArray[j].radius) > (memberArray[i].transform.position - memberArray[j].transform.position).magnitude)
                     {
+                        //Debug.Log("Collide: Distance is " + (memberArray[i].transform.position - memberArray[j].transform.position).magnitude + 
+                        //    ", radii are: " + (memberArray[i].radius) + ", " + (memberArray[j].radius));
                         Collide(memberArray[i], memberArray[j]);
                     }
                     memberArray[i].ApplyForce(forceVector);
@@ -98,7 +96,7 @@ public class GravitySim : MonoBehaviour
             obj1.density = newDensity;
             obj1.Reset();
             obj1.transform.position = centerOfMass;
-            obj2.Poof();
+            obj2.Destroy();
         }
         else
         {
@@ -107,7 +105,7 @@ public class GravitySim : MonoBehaviour
             obj2.density = newDensity;
             obj2.Reset();
             obj2.transform.position = centerOfMass;
-            obj1.Poof();
+            obj1.Destroy();
         }
     }
 

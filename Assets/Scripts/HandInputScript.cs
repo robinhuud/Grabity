@@ -134,7 +134,10 @@ public class HandInputScript : MonoBehaviour
     {
         Vector3 launchVelocity = OVRInput.GetLocalControllerVelocity(controller);
         projectile.velocity = launchVelocity;
-        projectile.GetComponent<MeshRenderer>().material = newMoonMaterial;
+        if(newMoonMaterial != null)
+        {
+            projectile.GetComponentInChildren<MeshRenderer>().material = newMoonMaterial;
+        }
         simulationSpace.RegisterObject(projectile);
         Debug.Log("Adding object to sim, pitch: " + nextProjectileRight.GetComponent<AudioSource>().pitch + " volume: " + projectile.GetComponent<AudioSource>().volume);
     }
