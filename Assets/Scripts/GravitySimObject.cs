@@ -103,6 +103,7 @@ public class GravitySimObject : MonoBehaviour
 
     public IEnumerator PlaySoundThenDie(float delay)
     {
+        // If it has a mesh renderer or skinned mesh renderer, turn it off
         if(GetComponentInChildren<MeshRenderer>())
         {
             GetComponentInChildren<MeshRenderer>().enabled = false;
@@ -117,9 +118,11 @@ public class GravitySimObject : MonoBehaviour
 
     public void OnTriggerEnter(Collider other)
     {
+        // This is for crashing into walls/floors. 
         // If other object is in the Gravity Simulation, then it's collision is already handled.
         if(!other.gameObject.GetComponent<GravitySimObject>())
         {
+            Debug.Log("Hit a thing");
             Destroy();
         }
     }

@@ -50,7 +50,7 @@ public class GravitySim : MonoBehaviour
     {
         Vector3 forceVector;
         // First apply the gravitational forces to all objects in the simulation
-        Debug.Log("FixedUpdate GravitySim memberArray.Length is " + memberArray.Length);
+        //Debug.Log("FixedUpdate GravitySim memberArray.Length is " + memberArray.Length);
         if(memberArray.Length > 1)
         {
             for (int i = 0; i < memberArray.Length; i++)

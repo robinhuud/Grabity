@@ -116,7 +116,7 @@ public class HandInputScript : MonoBehaviour
             newClip = 0;
         }
         aSource.clip = spawnClips[newClip];
-        Debug.Log("Clip is " + newClip);
+        //Debug.Log("Clip is " + newClip);
         aSource.timeSamples = beatMaster.timeSamples;
         aSource.enabled = true;
         
@@ -139,6 +139,6 @@ public class HandInputScript : MonoBehaviour
             projectile.GetComponentInChildren<MeshRenderer>().material = newMoonMaterial;
         }
         simulationSpace.RegisterObject(projectile);
-        Debug.Log("Adding object to sim, pitch: " + nextProjectileRight.GetComponent<AudioSource>().pitch + " volume: " + projectile.GetComponent<AudioSource>().volume);
+        //Debug.Log("Adding object to sim, pitch: " + nextProjectileRight.GetComponent<AudioSource>().pitch + " volume: " + projectile.GetComponent<AudioSource>().volume);
     }
 }
