@@ -5,8 +5,8 @@ using UnityEngine.XR;
 
 public class HandInputScript : MonoBehaviour
 {
-    public GameObject leftAnchor;
-    public GameObject rightAnchor;
+    public GameObject spawnPoint;
+    public OVRInput.Controller currentController;
     public GravitySim simulationSpace;
     public GravitySimObject projectileTemplate;
     public float flowRate = 500f;
@@ -16,92 +16,85 @@ public class HandInputScript : MonoBehaviour
     [SerializeField]
     public AudioClip[] spawnClips;
 
-    private bool rightGrabPressed = false;
-    private bool rightTriggerPressed = false;
-    private bool leftGrabPressed = false;
-    private bool leftTriggerPressed = false;
-    private GravitySimObject nextProjectileLeft;
-    private GravitySimObject nextProjectileRight;
+    private bool grabPressed = false;
+    private bool triggerPressed = false;
+    private GravitySimObject nextProjectile;
     private int newClip = 0;
+    int indexTrigger = Animator.StringToHash("IndexTrigger");
+    int handTrigger = Animator.StringToHash("HandTrigger");
+    Animator anim;
 
     void Awake()
     {
         // just in case you for got to un-set the world sim in the template object.
         projectileTemplate.worldSim = null;
+        anim = GetComponent<Animator>();
     }
     // Start is called before the first frame update
     void Start()
     {
-        CheckClips();
+        Debug.Assert(spawnClips.Length >= 2, "Not enough spawn clips");
+        Debug.Assert(anim != null, "no animator attached");
     }
 
     // Update is called once per frame
     void Update()
     {
-        UpdateTracking();
+        //UpdateTracking();
         CheckTriggers();
-    }
 
-    void CheckClips()
-    {
-        if(spawnClips.Length < 2)
-        {
-            Debug.Log("Less than 2 Audio Loops, please provide more");
-        }
     }
 
     void UpdateTracking()
     {
-        leftAnchor.transform.localPosition = OVRInput.GetLocalControllerPosition(OVRInput.Controller.LTouch);
-        leftAnchor.transform.rotation = OVRInput.GetLocalControllerRotation(OVRInput.Controller.LTouch);
-        rightAnchor.transform.localPosition = OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch);
-        rightAnchor.transform.rotation = OVRInput.GetLocalControllerRotation(OVRInput.Controller.RTouch);
+        spawnPoint.transform.localPosition = OVRInput.GetLocalControllerPosition(currentController);
+        spawnPoint.transform.rotation = OVRInput.GetLocalControllerRotation(currentController);
     }
     
     void CheckTriggers()
     {
-        float rightTrigger = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, OVRInput.Controller.RTouch);
-        float rightGrab = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, OVRInput.Controller.RTouch);
-        float leftTrigger = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, OVRInput.Controller.LTouch);
-        float leftGrab = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, OVRInput.Controller.LTouch);
-        if (rightTrigger > buttonThreshold)
+        float trigger = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, currentController);
+        float grab = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, currentController);
+        anim.SetFloat(indexTrigger, trigger);
+        anim.SetFloat(handTrigger, grab);
+        if (trigger > buttonThreshold)
         {
-            if (!rightTriggerPressed)
+            if (!triggerPressed)
             {
-                rightTriggerPressed = true;
-                CreateMoon(ref nextProjectileRight, OVRInput.Controller.RTouch);
+                triggerPressed = true;
+                CreateMoon(ref nextProjectile);
             }
         }
         else
         {
-            if (rightTriggerPressed)
+            if (triggerPressed)
             {
-                rightTriggerPressed = false;
-                ReleaseMoon(ref nextProjectileRight, OVRInput.Controller.RTouch);
+                triggerPressed = false;
+                ReleaseMoon(ref nextProjectile);
             }
         }
-        if (rightTriggerPressed)
+        if (triggerPressed)
         {
-            nextProjectileRight.transform.position = rightAnchor.transform.position;
-            nextProjectileRight.transform.rotation = rightAnchor.transform.rotation;
-            nextProjectileRight.mass += flowRate * rightTrigger * Time.deltaTime;
-            nextProjectileRight.Reset();
+            nextProjectile.transform.position = spawnPoint.transform.position;
+            nextProjectile.transform.rotation = spawnPoint.transform.rotation;
+            nextProjectile.mass += flowRate * trigger * Time.deltaTime;
+            nextProjectile.Reset();
         }
-        if(rightGrab > buttonThreshold)
+        if(grab > buttonThreshold)
         {
-            if(!rightGrabPressed)
+            if(!grabPressed)
             {
-                if(rightTriggerPressed)
+                if(triggerPressed)
                 {
-                    NextClip(ref nextProjectileRight);
+                    NextClip(ref nextProjectile);
                 }
-                rightGrabPressed = true;
+                grabPressed = true;
             }
         } else
         {
-            if(rightGrabPressed)
+            if(grabPressed)
             {
-                rightGrabPressed = false;
+                grabPressed = false;
             }
         }
     }
@@ -122,7 +115,7 @@ public class HandInputScript : MonoBehaviour
         
     }
 
-    void CreateMoon(ref GravitySimObject projectile, OVRInput.Controller controller)
+    void CreateMoon(ref GravitySimObject projectile)
     {
         projectile = Instantiate(projectileTemplate);
         projectile.GetComponent<AudioSource>().clip = spawnClips[newClip];
@@ -130,9 +123,9 @@ public class HandInputScript : MonoBehaviour
         projectile.GetComponent<AudioSource>().timeSamples = beatMaster.timeSamples;
     }
 
-    void ReleaseMoon(ref GravitySimObject projectile, OVRInput.Controller controller)
+    void ReleaseMoon(ref GravitySimObject projectile)
     {
-        Vector3 launchVelocity = OVRInput.GetLocalControllerVelocity(controller);
+        Vector3 launchVelocity = OVRInput.GetLocalControllerVelocity(currentController);
         projectile.velocity = launchVelocity;
         if(newMoonMaterial != null)
         {

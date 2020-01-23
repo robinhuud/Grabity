@@ -97,7 +97,7 @@ public class GravitySimObject : MonoBehaviour
             }
         } else
         {
-            Debug.Log("Already dead");
+            //Debug.Log("Already dead");
         }
     }
 
@@ -122,7 +122,7 @@ public class GravitySimObject : MonoBehaviour
         // If other object is in the Gravity Simulation, then it's collision is already handled.
         if(!other.gameObject.GetComponent<GravitySimObject>())
         {
-            Debug.Log("Hit a thing");
+            //Debug.Log("Hit a thing");
             Destroy();
         }
     }
