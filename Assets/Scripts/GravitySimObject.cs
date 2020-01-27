@@ -16,13 +16,15 @@ public class GravitySimObject : MonoBehaviour
     private bool dirty = true;
     private bool isDead = false;
     private AudioSource audioSource;
+    private GravitySimObject me;
 
     // Called before scene starts, before any Update is called on any object
     public void Awake()
     {
         if(worldSim != null && this.isActiveAndEnabled)
         {
-            worldSim.RegisterObject(this);
+            me = this;
+            worldSim.RegisterObject(ref me);
         }
         //Debug.Log("AWAKE: " + this.velocity);
     }
@@ -48,7 +50,10 @@ public class GravitySimObject : MonoBehaviour
     // FixedUpdate is for physics calculations, in this case, movement based on velocity.
     void FixedUpdate()
     {
-        this.transform.position += this.velocity * Time.fixedDeltaTime;
+        if(worldSim != null)
+        {
+            this.transform.position += this.velocity * Time.fixedDeltaTime;
+        }
     }
 
     // This is the place where we apply the force. Can be done multiple times per physics frame (FixedUpdate)
@@ -58,6 +63,7 @@ public class GravitySimObject : MonoBehaviour
         //Debug.Log("Applied Force " + force + " / " + mass);
         this.velocity += force / mass;
     }
+
     public void Reset()
     {
         // Calculate the volume based on density and mass
@@ -74,17 +80,20 @@ public class GravitySimObject : MonoBehaviour
             //Debug.Log(this.gameObject.name + " Pitch:" + audioSource.pitch + ", Vol:" + audioSource.volume);
         }
     }
-    public void Destroy()
+
+    public void Pop(bool playSound = true)
     {
         if(!isDead) // Don't do anything if you're already dead.
         {
+            me = this;
             isDead = true;
-            worldSim.UnregisterObject(this);
+            worldSim.UnregisterObject(ref me);
+            worldSim = null;
             if(null != GetComponent<ParticleSystem>())
             {
                 GetComponent<ParticleSystem>().Stop();
             }
-            if (audioSource != null && popClip != null && audioSource.isActiveAndEnabled)
+            if (playSound && audioSource != null && popClip != null && audioSource.isActiveAndEnabled)
             {
                 audioSource.Stop();
                 audioSource.PlayOneShot(popClip);
@@ -99,6 +108,25 @@ public class GravitySimObject : MonoBehaviour
         {
             //Debug.Log("Already dead");
         }
+    }
+
+    public void Bounce(Collider other)
+    {
+        RaycastHit hit;
+        Vector3 posLastFrame = this.transform.position - (velocity * Time.fixedDeltaTime);
+        other.Raycast(new Ray(posLastFrame, velocity.normalized), out hit, velocity.magnitude * 2f);
+        // reflect the velocity around the hit normal
+        if(hit.collider != null)
+        {
+            Vector3 reflect = velocity + 2f * (hit.normal * (Vector3.Dot(-velocity, hit.normal)));
+            //Debug.Log("posLastFrame:" + posLastFrame + "\nhit.normal:" + hit.normal + "\nreflect:" + reflect);
+            this.velocity = reflect;
+        }
+    }
+
+    public void Push(Collider other)
+    {
+        //this.velocity *= 0;
     }
 
     public IEnumerator PlaySoundThenDie(float delay)
@@ -122,8 +150,18 @@ public class GravitySimObject : MonoBehaviour
         // If other object is in the Gravity Simulation, then it's collision is already handled.
         if(!other.gameObject.GetComponent<GravitySimObject>())
         {
-            //Debug.Log("Hit a thing");
-            Destroy();
+            if (other.CompareTag("Pop"))
+            {
+                Pop();
+            }
+            if(other.CompareTag("Bounce"))
+            {
+                Bounce(other);
+            }
+            if(other.CompareTag("Push"))
+            {
+                Push(other);
+            }
         }
     }
 }

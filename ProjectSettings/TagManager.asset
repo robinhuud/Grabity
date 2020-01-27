@@ -3,7 +3,11 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Pop
+  - Bounce
+  - Push
+  - Grab
   layers:
   - Default
   - TransparentFX

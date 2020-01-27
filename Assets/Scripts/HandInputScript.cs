@@ -6,6 +6,7 @@ using UnityEngine.XR;
 public class HandInputScript : MonoBehaviour
 {
     public GameObject spawnPoint;
+    public Collider grabCollider;
     public OVRInput.Controller currentController;
     public GravitySim simulationSpace;
     public GravitySimObject projectileTemplate;
@@ -16,8 +17,9 @@ public class HandInputScript : MonoBehaviour
     [SerializeField]
     public AudioClip[] spawnClips;
 
-    private bool grabPressed = false;
-    private bool triggerPressed = false;
+    private bool holdingProjectile = false;
+    private bool spawningProjectile = false;
+    private bool wantsToGrab = false;
     private GravitySimObject nextProjectile;
     private int newClip = 0;
     int indexTrigger = Animator.StringToHash("IndexTrigger");
@@ -59,43 +61,54 @@ public class HandInputScript : MonoBehaviour
         anim.SetFloat(handTrigger, grab);
         if (trigger > buttonThreshold)
         {
-            if (!triggerPressed)
+            if (!spawningProjectile && !holdingProjectile)
             {
-                triggerPressed = true;
-                CreateMoon(ref nextProjectile);
+                spawningProjectile = true;
+                CreateProjectile(ref nextProjectile);
+                NextClip(ref nextProjectile);
             }
         }
         else
         {
-            if (triggerPressed)
+            if (spawningProjectile)
             {
-                triggerPressed = false;
-                ReleaseMoon(ref nextProjectile);
+                spawningProjectile = false;
+                ReleaseProjectile(ref nextProjectile);
             }
-        }
-        if (triggerPressed)
-        {
-            nextProjectile.transform.position = spawnPoint.transform.position;
-            nextProjectile.transform.rotation = spawnPoint.transform.rotation;
-            nextProjectile.mass += flowRate * trigger * Time.deltaTime;
-            nextProjectile.Reset();
         }
         if(grab > buttonThreshold)
         {
-            if(!grabPressed)
+            if(!holdingProjectile && !spawningProjectile)
             {
-                if(triggerPressed)
-                {
-                    NextClip(ref nextProjectile);
-                }
-                grabPressed = true;
+                wantsToGrab = true;
             }
         } else
         {
-            if(grabPressed)
+            wantsToGrab = false;
+            if(holdingProjectile)
             {
-                grabPressed = false;
+                ReleaseProjectile(ref nextProjectile);
+                holdingProjectile = false;
             }
+        }
+        if (spawningProjectile || holdingProjectile)
+        {
+            nextProjectile.transform.position = spawnPoint.transform.position;
+            nextProjectile.transform.rotation = spawnPoint.transform.rotation;
+            if (spawningProjectile)
+            {
+                nextProjectile.mass += flowRate * trigger * Time.deltaTime;
+                nextProjectile.Reset();
+            }
+        }
+    }
+
+    public void OnTriggerEnter(Collider other)
+    {
+        GravitySimObject grabbed = other.gameObject.GetComponent<GravitySimObject>();
+        if (grabbed != null && grabbed.worldSim != null && wantsToGrab)
+        {
+            GrabProjectile(ref grabbed);
         }
     }
 
@@ -115,15 +128,30 @@ public class HandInputScript : MonoBehaviour
         
     }
 
-    void CreateMoon(ref GravitySimObject projectile)
+    void GrabProjectile(ref GravitySimObject projectile)
     {
-        projectile = Instantiate(projectileTemplate);
-        projectile.GetComponent<AudioSource>().clip = spawnClips[newClip];
-        projectile.GetComponent<AudioSource>().enabled = true;
-        projectile.GetComponent<AudioSource>().timeSamples = beatMaster.timeSamples;
+        Debug.Log("GRABBED");
+        projectile.Pop(false);
+        holdingProjectile = true;
+        //simulationSpace.UnregisterObject(ref projectile);
+        //projectile.worldSim = null;
+        CreateProjectile(ref nextProjectile);
+        nextProjectile.mass = projectile.mass;
+        nextProjectile.Reset();
+        nextProjectile.GetComponent<AudioSource>().clip = projectile.GetComponent<AudioSource>().clip;
+        projectile.transform.gameObject.SetActive(false);
     }
 
-    void ReleaseMoon(ref GravitySimObject projectile)
+    void CreateProjectile(ref GravitySimObject projectile)
+    {
+        projectile = Instantiate(projectileTemplate);
+        AudioSource aSource = projectile.GetComponent<AudioSource>();
+        aSource.clip = spawnClips[newClip];
+        aSource.enabled = true;
+        aSource.timeSamples = beatMaster.timeSamples;
+    }
+
+    void ReleaseProjectile(ref GravitySimObject projectile)
     {
         Vector3 launchVelocity = OVRInput.GetLocalControllerVelocity(currentController);
         projectile.velocity = launchVelocity;
@@ -131,7 +159,7 @@ public class HandInputScript : MonoBehaviour
         {
             projectile.GetComponentInChildren<MeshRenderer>().material = newMoonMaterial;
         }
-        simulationSpace.RegisterObject(projectile);
+        simulationSpace.RegisterObject(ref projectile);
         //Debug.Log("Adding object to sim, pitch: " + nextProjectileRight.GetComponent<AudioSource>().pitch + " volume: " + projectile.GetComponent<AudioSource>().volume);
     }
 }

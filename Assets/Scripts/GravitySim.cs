@@ -11,21 +11,21 @@ public class GravitySim : MonoBehaviour
 {
     public float GravitationalConstant = 6.67e-11f;
     public GravitySimObject trackObject;
+
     private List<GravitySimObject> members = new List<GravitySimObject>();
     private GravitySimObject[] memberArray;
-    private bool tracking = false;
     private bool dirty = true;
 
     // Register method allows GravitySimObjects to register in this simulation
     // re-creates the array each time the list is updated.
-    public void RegisterObject(GravitySimObject obj)
+    public void RegisterObject(ref GravitySimObject obj)
     {
         members.Add(obj);
         obj.worldSim = this;
         dirty = true;
     }
 
-    public void UnregisterObject(GravitySimObject obj)
+    public void UnregisterObject(ref GravitySimObject obj)
     {
         members.Remove(obj);
         dirty = true;
@@ -42,6 +42,7 @@ public class GravitySim : MonoBehaviour
         {
             dirty = false;
             memberArray = members.ToArray();
+            //Debug.Log("Members:" + memberArray.Length);
         }
     }
 
@@ -96,7 +97,7 @@ public class GravitySim : MonoBehaviour
             obj1.density = newDensity;
             obj1.Reset();
             obj1.transform.position = centerOfMass;
-            obj2.Destroy();
+            obj2.Pop();
         }
         else
         {
@@ -105,7 +106,7 @@ public class GravitySim : MonoBehaviour
             obj2.density = newDensity;
             obj2.Reset();
             obj2.transform.position = centerOfMass;
-            obj1.Destroy();
+            obj1.Pop();
         }
     }
 
