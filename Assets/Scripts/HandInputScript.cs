@@ -29,7 +29,7 @@ public class HandInputScript : MonoBehaviour
     void Awake()
     {
         // just in case you for got to un-set the world sim in the template object.
-        projectileTemplate.worldSim = null;
+        //projectileTemplate.worldSim = null;
         anim = GetComponent<Animator>();
     }
     // Start is called before the first frame update

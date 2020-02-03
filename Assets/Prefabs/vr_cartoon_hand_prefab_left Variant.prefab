@@ -9,7 +9,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1394192276799734, guid: 7818d5a3aeddace4ebe861fe3c939778, type: 3}
       propertyPath: m_Name
-      value: vr_cartoon_hand_prefab_left
+      value: vr_cartoon_hand_prefab_left Variant
       objectReference: {fileID: 0}
     - target: {fileID: 4524033164030228, guid: 7818d5a3aeddace4ebe861fe3c939778, type: 3}
       propertyPath: m_LocalPosition.x
