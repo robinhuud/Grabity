@@ -9,63 +9,57 @@ public class HandInputScript : MonoBehaviour
     public Collider grabCollider;
     public OVRInput.Controller currentController;
     public GravitySim simulationSpace;
-    public GravitySimObject projectileTemplate;
+    public GameObject projectileTemplate;
     public float flowRate = 500f;
     public AudioSource beatMaster;
     public float buttonThreshold = .1f;
     public Material newMoonMaterial;
-    [SerializeField]
-    public AudioClip[] spawnClips;
 
+    private ObjectPooler objectPooler;
     private bool holdingProjectile = false;
     private bool spawningProjectile = false;
     private bool wantsToGrab = false;
-    private GravitySimObject nextProjectile;
-    private int newClip = 0;
+    private JugglingBall nextProjectile;
+    private GravitySimObject startingGravitySimObject;
+    private int currentClip = 0;
+
     int indexTrigger = Animator.StringToHash("IndexTrigger");
     int handTrigger = Animator.StringToHash("HandTrigger");
     Animator anim;
 
     void Awake()
     {
-        // just in case you for got to un-set the world sim in the template object.
-        //projectileTemplate.worldSim = null;
         anim = GetComponent<Animator>();
+        startingGravitySimObject = Instantiate(projectileTemplate).GetComponent<GravitySimObject>();
     }
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Assert(spawnClips.Length >= 2, "Not enough spawn clips");
         Debug.Assert(anim != null, "no animator attached");
+        objectPooler = ObjectPooler.Instance;
     }
 
     // Update is called once per frame
     void Update()
     {
-        //UpdateTracking();
         CheckTriggers();
-
-    }
-
-    void UpdateTracking()
-    {
-        spawnPoint.transform.localPosition = OVRInput.GetLocalControllerPosition(currentController);
-        spawnPoint.transform.rotation = OVRInput.GetLocalControllerRotation(currentController);
     }
     
     void CheckTriggers()
     {
         float trigger = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, currentController);
         float grab = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, currentController);
-        anim.SetFloat(indexTrigger, trigger);
-        anim.SetFloat(handTrigger, grab);
+        if(anim != null)
+        {
+            anim.SetFloat(indexTrigger, trigger);
+            anim.SetFloat(handTrigger, grab);
+        }
         if (trigger > buttonThreshold)
         {
             if (!spawningProjectile && !holdingProjectile)
             {
                 spawningProjectile = true;
-                CreateProjectile(ref nextProjectile);
-                NextClip(ref nextProjectile);
+                CreateProjectile();
             }
         }
         else
@@ -73,7 +67,7 @@ public class HandInputScript : MonoBehaviour
             if (spawningProjectile)
             {
                 spawningProjectile = false;
-                ReleaseProjectile(ref nextProjectile);
+                LaunchProjectile();
             }
         }
         if(grab > buttonThreshold)
@@ -82,12 +76,17 @@ public class HandInputScript : MonoBehaviour
             {
                 wantsToGrab = true;
             }
-        } else
+            else
+            {
+                wantsToGrab = false;
+            }
+        }
+        else
         {
             wantsToGrab = false;
             if(holdingProjectile)
             {
-                ReleaseProjectile(ref nextProjectile);
+                LaunchProjectile();
                 holdingProjectile = false;
             }
         }
@@ -97,7 +96,7 @@ public class HandInputScript : MonoBehaviour
             nextProjectile.transform.rotation = spawnPoint.transform.rotation;
             if (spawningProjectile)
             {
-                nextProjectile.mass += flowRate * trigger * Time.deltaTime;
+                nextProjectile.gravityObject.mass += flowRate * trigger * Time.deltaTime;
                 nextProjectile.Reset();
             }
         }
@@ -105,61 +104,53 @@ public class HandInputScript : MonoBehaviour
 
     public void OnTriggerEnter(Collider other)
     {
-        GravitySimObject grabbed = other.gameObject.GetComponent<GravitySimObject>();
-        if (grabbed != null && grabbed.worldSim != null && wantsToGrab)
+        JugglingBall grabbed = other.gameObject.GetComponent<JugglingBall>();
+        if (grabbed != null && grabbed.gravityObject.worldSim != null && wantsToGrab)
         {
             GrabProjectile(ref grabbed);
         }
     }
 
-    void NextClip(ref GravitySimObject projectile)
+    public void OnTriggerStay(Collider other)
     {
-        AudioSource aSource = projectile.GetComponent<AudioSource>();
-        aSource.enabled = false;
-        newClip++;
-        if(newClip >= spawnClips.Length)
+        JugglingBall grabbed = other.gameObject.GetComponent<JugglingBall>();
+        if (grabbed != null && grabbed.gravityObject.worldSim != null && wantsToGrab)
         {
-            newClip = 0;
+            GrabProjectile(ref grabbed);
         }
-        aSource.clip = spawnClips[newClip];
-        //Debug.Log("Clip is " + newClip);
-        aSource.timeSamples = beatMaster.timeSamples;
-        aSource.enabled = true;
-        
     }
 
-    void GrabProjectile(ref GravitySimObject projectile)
+    void GrabProjectile(ref JugglingBall projectile)
     {
-        Debug.Log("GRABBED");
+        //Debug.Log("GRABBED");
         projectile.Pop(false);
         holdingProjectile = true;
-        //simulationSpace.UnregisterObject(ref projectile);
-        //projectile.worldSim = null;
-        CreateProjectile(ref nextProjectile);
-        nextProjectile.mass = projectile.mass;
+        
+        CreateProjectile();
+        nextProjectile.gravityObject.mass = projectile.gravityObject.mass;
         nextProjectile.Reset();
-        nextProjectile.GetComponent<AudioSource>().clip = projectile.GetComponent<AudioSource>().clip;
-        projectile.transform.gameObject.SetActive(false);
+        nextProjectile.soundObject.SetClip(projectile.GetComponent<SoundSimElement>().GetClip());
     }
 
-    void CreateProjectile(ref GravitySimObject projectile)
+    void CreateProjectile()
     {
-        projectile = Instantiate(projectileTemplate);
-        AudioSource aSource = projectile.GetComponent<AudioSource>();
-        aSource.clip = spawnClips[newClip];
-        aSource.enabled = true;
-        aSource.timeSamples = beatMaster.timeSamples;
+        GameObject newGameObject = objectPooler.SpawnFromPool("ball", spawnPoint.transform.position, spawnPoint.transform.rotation);
+        //Debug.Log("gameobject" + newGameObject);
+        nextProjectile = newGameObject.GetComponent<JugglingBall>();
+        nextProjectile.gravityObject.mass = startingGravitySimObject.mass;
+        nextProjectile.soundObject.SetClip(++currentClip);
     }
 
-    void ReleaseProjectile(ref GravitySimObject projectile)
+    void LaunchProjectile()
     {
         Vector3 launchVelocity = OVRInput.GetLocalControllerVelocity(currentController);
-        projectile.velocity = launchVelocity;
+        nextProjectile.gravityObject.velocity = launchVelocity;
         if(newMoonMaterial != null)
         {
-            projectile.GetComponentInChildren<MeshRenderer>().material = newMoonMaterial;
+            nextProjectile.GetComponentInChildren<MeshRenderer>().material = newMoonMaterial;
         }
-        simulationSpace.RegisterObject(ref projectile);
+        nextProjectile.gravityObject.worldSim = simulationSpace;
+        nextProjectile.gravityObject.Init();
         //Debug.Log("Adding object to sim, pitch: " + nextProjectileRight.GetComponent<AudioSource>().pitch + " volume: " + projectile.GetComponent<AudioSource>().volume);
     }
 }

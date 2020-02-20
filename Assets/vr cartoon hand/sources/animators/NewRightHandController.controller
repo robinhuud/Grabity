@@ -43,7 +43,7 @@ BlendTree:
     m_Motion: {fileID: 4108574795491154050, guid: 85e2246f1c3c08f42a024e6170ba8a86,
       type: 3}
     m_Threshold: 0.2
-    m_Position: {x: 1.2, y: 1.2}
+    m_Position: {x: 2, y: 2}
     m_TimeScale: 1
     m_CycleOffset: 0
     m_DirectBlendParameter: HandTrigger
@@ -61,7 +61,7 @@ BlendTree:
     m_Motion: {fileID: 6145234775231182873, guid: 85e2246f1c3c08f42a024e6170ba8a86,
       type: 3}
     m_Threshold: 0.6
-    m_Position: {x: 1.2, y: -0.2}
+    m_Position: {x: 1.5, y: -0.5}
     m_TimeScale: 1
     m_CycleOffset: 0
     m_DirectBlendParameter: HandTrigger
@@ -70,16 +70,7 @@ BlendTree:
     m_Motion: {fileID: -1868554949304737204, guid: 85e2246f1c3c08f42a024e6170ba8a86,
       type: 3}
     m_Threshold: 0.8
-    m_Position: {x: 0.8, y: 0.8}
-    m_TimeScale: 1
-    m_CycleOffset: 0
-    m_DirectBlendParameter: HandTrigger
-    m_Mirror: 0
-  - serializedVersion: 2
-    m_Motion: {fileID: -1868554949304737204, guid: 85e2246f1c3c08f42a024e6170ba8a86,
-      type: 3}
-    m_Threshold: 1
-    m_Position: {x: 0.8, y: 0.2}
+    m_Position: {x: 0.9, y: 0.1}
     m_TimeScale: 1
     m_CycleOffset: 0
     m_DirectBlendParameter: HandTrigger
@@ -87,7 +78,7 @@ BlendTree:
   m_BlendParameter: HandTrigger
   m_BlendParameterY: IndexTrigger
   m_MinThreshold: 0
-  m_MaxThreshold: 1
+  m_MaxThreshold: 0.8
   m_UseAutomaticThresholds: 1
   m_NormalizedBlendValues: 0
   m_BlendType: 3
