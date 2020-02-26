@@ -14,6 +14,8 @@ public class JugglingBall : MonoBehaviour, IPooledObject
     [SerializeField]
     public SoundSimElement soundObject;
 
+    public int score = 0;
+
     private bool isActive = false;
 
     private ObjectPooler objectPooler;
@@ -55,6 +57,7 @@ public class JugglingBall : MonoBehaviour, IPooledObject
         {
             soundObject.SetToneByMass(gravityObject.mass);
         }
+        score = Mathf.FloorToInt(gravityObject.mass/1000);
     }
 
     public void Pop(bool playSound = true)
@@ -97,6 +100,15 @@ public class JugglingBall : MonoBehaviour, IPooledObject
 
     }
 
+    public void Score(Collider other)
+    {
+        ScoreTarget st = other.gameObject.GetComponent<ScoreTarget>();
+        if (st != null)
+        {
+            st.activate(score);
+        }
+    }
+
     // This is the object that handles collisions.
     public void OnTriggerEnter(Collider other)
     {
@@ -115,6 +127,10 @@ public class JugglingBall : MonoBehaviour, IPooledObject
             if (other.CompareTag("Push"))
             {
                 Push(other);
+            }
+            if (other.CompareTag("Score"))
+            {
+                Score(other);
             }
         }
     }

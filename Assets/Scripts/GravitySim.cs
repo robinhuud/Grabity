@@ -67,7 +67,7 @@ public class GravitySim : MonoBehaviour
                     {
                         //Debug.Log("Collide: Distance is " + (memberArray[i].transform.position - memberArray[j].transform.position).magnitude + 
                         //    ", radii are: " + (memberArray[i].radius) + ", " + (memberArray[j].radius));
-                        Combine(memberArray[i], memberArray[j]);
+                        Combine(ref memberArray[i], ref memberArray[j]);
                     } else
                     {
                         memberArray[i].ApplyForce(forceVector);
@@ -90,7 +90,7 @@ public class GravitySim : MonoBehaviour
         }
     }
 
-    private void Combine(GravitySimObject obj1, GravitySimObject obj2)
+    private void Combine(ref GravitySimObject obj1, ref GravitySimObject obj2)
     {
         float massRatio = obj1.mass / (obj2.mass + obj1.mass);
         Vector3 newVelocity = obj1.velocity * massRatio + obj2.velocity * (1f - massRatio);

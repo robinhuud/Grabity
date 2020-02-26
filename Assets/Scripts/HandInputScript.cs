@@ -144,6 +144,7 @@ public class HandInputScript : MonoBehaviour
     void LaunchProjectile()
     {
         Vector3 launchVelocity = OVRInput.GetLocalControllerVelocity(currentController);
+        Vector3 launchSpin = OVRInput.GetLocalControllerAngularVelocity(currentController);
         nextProjectile.gravityObject.velocity = launchVelocity;
         if(newMoonMaterial != null)
         {
