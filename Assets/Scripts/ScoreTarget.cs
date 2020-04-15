@@ -5,9 +5,9 @@ using TMPro;
 
 public class ScoreTarget : MonoBehaviour
 {
-
     public int points;
     TextMeshPro textField;
+    public Color flashColor = new Color(1f,0f,0f,1f);
 
     private Color previousColor;
 
@@ -17,17 +17,17 @@ public class ScoreTarget : MonoBehaviour
         textField.text = "";
     }
 
-    public void activate(int score)
+    public void activate(int score, float delay = 0.2f)
     {
         previousColor = textField.faceColor;
-        textField.faceColor = new Color(1f, 0f, 0f, 1f);
+        textField.faceColor = flashColor;
         textField.text = score.ToString();
-        StartCoroutine(deactivate());
+        StartCoroutine(deactivate(delay));
     }
 
-    IEnumerator deactivate()
+    IEnumerator deactivate(float time)
     {
-        yield return new WaitForSeconds(.2f);
+        yield return new WaitForSeconds(time);
         textField.faceColor = previousColor;
         textField.text = "";
         yield return null;

@@ -32,6 +32,7 @@ public class GravitySim : MonoBehaviour
     public void UnregisterObject(ref GravitySimObject obj)
     {
         members.Remove(obj);
+        obj.worldSim = null;
         dirty = true;
     }
 
@@ -55,7 +56,6 @@ public class GravitySim : MonoBehaviour
     {
         Vector3 forceVector;
         // First apply the gravitational forces to all objects in the simulation, and check for overlaps
-        //Debug.Log("FixedUpdate GravitySim memberArray.Length is " + memberArray.Length);
         if(memberArray.Length > 1)
         {
             for (int i = 0; i < memberArray.Length; i++)
@@ -103,7 +103,7 @@ public class GravitySim : MonoBehaviour
             obj1.density = newDensity;
             obj1.Resize();
             obj1.transform.position = centerOfMass;
-            obj2.Pop();
+            obj2.Die();
         }
         else
         {
@@ -112,7 +112,7 @@ public class GravitySim : MonoBehaviour
             obj2.density = newDensity;
             obj2.Resize();
             obj2.transform.position = centerOfMass;
-            obj1.Pop();
+            obj1.Die();
         }
     }
 

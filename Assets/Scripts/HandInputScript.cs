@@ -20,6 +20,7 @@ public class HandInputScript : MonoBehaviour
     private bool spawningProjectile = false;
     private bool wantsToGrab = false;
     private JugglingBall nextProjectile;
+    private JugglingBall grabbedProjectile;
     private GravitySimObject startingGravitySimObject;
     private int currentClip = 0;
 
@@ -76,10 +77,6 @@ public class HandInputScript : MonoBehaviour
             {
                 wantsToGrab = true;
             }
-            else
-            {
-                wantsToGrab = false;
-            }
         }
         else
         {
@@ -88,6 +85,7 @@ public class HandInputScript : MonoBehaviour
             {
                 LaunchProjectile();
                 holdingProjectile = false;
+                grabbedProjectile = null;
             }
         }
         if (spawningProjectile || holdingProjectile)
@@ -102,43 +100,50 @@ public class HandInputScript : MonoBehaviour
         }
     }
 
-    public void OnTriggerEnter(Collider other)
-    {
-        JugglingBall grabbed = other.gameObject.GetComponent<JugglingBall>();
-        if (grabbed != null && grabbed.gravityObject.worldSim != null && wantsToGrab)
-        {
-            GrabProjectile(ref grabbed);
-        }
-    }
-
     public void OnTriggerStay(Collider other)
     {
-        JugglingBall grabbed = other.gameObject.GetComponent<JugglingBall>();
-        if (grabbed != null && grabbed.gravityObject.worldSim != null && wantsToGrab)
+        if (wantsToGrab)
         {
-            GrabProjectile(ref grabbed);
+            grabbedProjectile = other.gameObject.GetComponent<JugglingBall>();
+            if (grabbedProjectile != null && grabbedProjectile.gravityObject.worldSim != null)
+            {
+                wantsToGrab = false;
+                GrabProjectile(ref grabbedProjectile);
+            }
         }
     }
 
     void GrabProjectile(ref JugglingBall projectile)
-    {
-        //Debug.Log("GRABBED");
+    {   
+        CreateProjectile(projectile.gravityObject.mass, projectile.GetComponent<SoundSimElement>().GetClip());
         projectile.Pop(false);
         holdingProjectile = true;
-        
-        CreateProjectile();
-        nextProjectile.gravityObject.mass = projectile.gravityObject.mass;
-        nextProjectile.Reset();
-        nextProjectile.soundObject.SetClip(projectile.GetComponent<SoundSimElement>().GetClip());
+        //Debug.Log(nextProjectile.gravityObject.worldSim);
     }
 
-    void CreateProjectile()
+    void CreateProjectile(float mass = 0, int clipId = -1)
     {
         GameObject newGameObject = objectPooler.SpawnFromPool("ball", spawnPoint.transform.position, spawnPoint.transform.rotation);
         //Debug.Log("gameobject" + newGameObject);
         nextProjectile = newGameObject.GetComponent<JugglingBall>();
-        nextProjectile.gravityObject.mass = startingGravitySimObject.mass;
-        nextProjectile.soundObject.SetClip(++currentClip);
+        if(mass == 0)
+        {
+            nextProjectile.gravityObject.mass = startingGravitySimObject.mass;
+        }
+        else
+        {
+            nextProjectile.gravityObject.mass = mass;
+        }
+        if(clipId == -1)
+        {
+            nextProjectile.soundObject.SetClip(currentClip);
+        }
+        else
+        {
+            nextProjectile.soundObject.SetClip(clipId);
+        }
+        
+        nextProjectile.Reset();
     }
 
     void LaunchProjectile()
@@ -146,12 +151,14 @@ public class HandInputScript : MonoBehaviour
         Vector3 launchVelocity = OVRInput.GetLocalControllerVelocity(currentController);
         Vector3 launchSpin = OVRInput.GetLocalControllerAngularVelocity(currentController);
         nextProjectile.gravityObject.velocity = launchVelocity;
+        nextProjectile.gravityObject.spin = launchSpin;
         if(newMoonMaterial != null)
         {
             nextProjectile.GetComponentInChildren<MeshRenderer>().material = newMoonMaterial;
         }
         nextProjectile.gravityObject.worldSim = simulationSpace;
         nextProjectile.gravityObject.Init();
+
         //Debug.Log("Adding object to sim, pitch: " + nextProjectileRight.GetComponent<AudioSource>().pitch + " volume: " + projectile.GetComponent<AudioSource>().volume);
     }
 }

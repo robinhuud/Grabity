@@ -30,7 +30,7 @@ public class JugglingBall : MonoBehaviour, IPooledObject
 
     public void OnObjectDespawn()
     {
-        gravityObject.Pop();
+        gravityObject.Die();
         soundObject.Pop(false);
         isActive = false;
     }
@@ -47,9 +47,9 @@ public class JugglingBall : MonoBehaviour, IPooledObject
 
     }
 
-    public void Reset()
+    public void Reset(bool resizeGravity = true)
     {
-        if(gravityObject != null)
+        if(gravityObject != null && resizeGravity)
         {
             gravityObject.Resize();
         }
@@ -58,6 +58,11 @@ public class JugglingBall : MonoBehaviour, IPooledObject
             soundObject.SetToneByMass(gravityObject.mass);
         }
         score = Mathf.FloorToInt(gravityObject.mass/1000);
+        SphereCollider c = GetComponent<SphereCollider>();
+        if ( c != null)
+        {
+            c.radius = gravityObject.radius;
+        }
     }
 
     public void Pop(bool playSound = true)
@@ -66,7 +71,7 @@ public class JugglingBall : MonoBehaviour, IPooledObject
         {
             isActive = false;
             // Remove myself from the simulation.
-            gravityObject.Pop();
+            gravityObject.Die();
             // Stop any particle Systems
             if (null != GetComponent<ParticleSystem>())
             {

@@ -7,12 +7,13 @@ public class GravitySimObject : MonoBehaviour
     public float mass = 100f; // measured in Kg
     public float density = 1f; // measured in Kg/m^3
     public Vector3 velocity; // measured in m/s
+    public Vector3 spin = Vector3.zero; // rotation per tick
     [SerializeField]
     public GravitySim worldSim;
 
     public float radius;
 
-    private bool isDead = false;
+    private bool isDead = true;
     private GravitySimObject me;
 
     public void OnEnable()
@@ -28,6 +29,7 @@ public class GravitySimObject : MonoBehaviour
             isDead = false;
             worldSim.RegisterObject(ref me);
         }
+        isDead = false;
         Resize();
     }
 
@@ -45,6 +47,7 @@ public class GravitySimObject : MonoBehaviour
             if (worldSim != null)
             {
                 this.transform.position += this.velocity * Time.fixedDeltaTime;
+                this.transform.Rotate(this.spin);
             }
         }
     }
@@ -60,9 +63,15 @@ public class GravitySimObject : MonoBehaviour
         // Calculate radius of sphere based on volume (mass / density)
         radius = Mathf.Pow((((mass / density) / Mathf.PI) * (.75f)), (1.0f / 3.0f));
         this.transform.localScale = new Vector3(radius, radius, radius);
+
+        JugglingBall jb = GetComponent<JugglingBall>();
+        if(jb != null)
+        {
+            jb.Reset(false);
+        }
     }
 
-    public void Pop()
+    public void Die()
     {
         if (!isDead) // Don't do anything if you're already dead.
         {
@@ -70,11 +79,14 @@ public class GravitySimObject : MonoBehaviour
             // Remove myself from the simulation.
             worldSim.UnregisterObject(ref me);
             worldSim = null;
+
+            // Special case for JugglingBalls Colliding
             JugglingBall jb = GetComponent<JugglingBall>();
             if(jb != null)
             {
                 jb.Pop();
-            } else
+            }
+            else
             {
                 Debug.Log("No JugglingBall");
             }
