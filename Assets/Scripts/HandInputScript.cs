@@ -23,6 +23,7 @@ public class HandInputScript : MonoBehaviour
     private JugglingBall grabbedProjectile;
     private GravitySimObject startingGravitySimObject;
     private int currentClip = 0;
+    private GameLogicManager glm;
 
     int indexTrigger = Animator.StringToHash("IndexTrigger");
     int handTrigger = Animator.StringToHash("HandTrigger");
@@ -38,6 +39,7 @@ public class HandInputScript : MonoBehaviour
     {
         Debug.Assert(anim != null, "no animator attached");
         objectPooler = ObjectPooler.Instance;
+        glm = GameLogicManager.Instance;
     }
 
     // Update is called once per frame
@@ -57,7 +59,7 @@ public class HandInputScript : MonoBehaviour
         }
         if (trigger > buttonThreshold)
         {
-            if (!spawningProjectile && !holdingProjectile)
+            if (!spawningProjectile && !holdingProjectile && glm.CanSpawn())
             {
                 spawningProjectile = true;
                 CreateProjectile();
@@ -114,16 +116,23 @@ public class HandInputScript : MonoBehaviour
     }
 
     void GrabProjectile(ref JugglingBall projectile)
-    {   
+    {
+        if (projectile != nextProjectile)
+        {
+            glm.AddScore(projectile.score);
+        }
         CreateProjectile(projectile.gravityObject.mass, projectile.GetComponent<SoundSimElement>().GetClip());
         projectile.Pop(false);
+        glm.AddBalls(1);
         holdingProjectile = true;
+
         //Debug.Log(nextProjectile.gravityObject.worldSim);
     }
 
     void CreateProjectile(float mass = 0, int clipId = -1)
     {
         GameObject newGameObject = objectPooler.SpawnFromPool("ball", spawnPoint.transform.position, spawnPoint.transform.rotation);
+        glm.AddBalls(-1);
         //Debug.Log("gameobject" + newGameObject);
         nextProjectile = newGameObject.GetComponent<JugglingBall>();
         if(mass == 0)

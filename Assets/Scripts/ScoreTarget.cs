@@ -17,15 +17,15 @@ public class ScoreTarget : MonoBehaviour
         textField.text = "";
     }
 
-    public void activate(int score, float delay = 0.2f)
+    public void flash(int score, float delay = 0.2f)
     {
         previousColor = textField.faceColor;
         textField.faceColor = flashColor;
         textField.text = score.ToString();
-        StartCoroutine(deactivate(delay));
+        StartCoroutine(unflash(delay));
     }
 
-    IEnumerator deactivate(float time)
+    IEnumerator unflash(float time)
     {
         yield return new WaitForSeconds(time);
         textField.faceColor = previousColor;

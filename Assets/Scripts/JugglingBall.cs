@@ -20,6 +20,7 @@ public class JugglingBall : MonoBehaviour, IPooledObject
 
     private ObjectPooler objectPooler;
     private GameObject me;
+    private GameLogicManager glm;
 
     public void OnObjectSpawn()
     {
@@ -39,6 +40,7 @@ public class JugglingBall : MonoBehaviour, IPooledObject
     {
         objectPooler = ObjectPooler.Instance;
         me = this.gameObject;
+        glm = GameLogicManager.Instance;
     }
 
     // Update is called once per frame
@@ -81,9 +83,22 @@ public class JugglingBall : MonoBehaviour, IPooledObject
             if (soundObject != null)
             {
                 soundObject.Pop(playSound);
+                StartCoroutine(WaitThenDie(soundObject.popClip.length));
             }
-            objectPooler.ReleaseFromPool("ball", ref me);
+            else
+            {
+                objectPooler.ReleaseFromPool("ball", ref me);
+            }
         }
+    }
+
+    private IEnumerator WaitThenDie(float delay)
+    {
+        // If it has a mesh renderer or skinned mesh renderer, turn it off
+        yield return new WaitForSeconds(delay);
+        // RETURN TO POOL
+        objectPooler.ReleaseFromPool("ball", ref me);
+        yield return false;
     }
 
     public void Bounce(Collider other)
@@ -110,8 +125,9 @@ public class JugglingBall : MonoBehaviour, IPooledObject
         ScoreTarget st = other.gameObject.GetComponent<ScoreTarget>();
         if (st != null)
         {
-            st.activate(score);
+            st.flash(score);
         }
+        glm.AddScore(score);
     }
 
     // This is the object that handles collisions.
